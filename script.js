@@ -297,28 +297,83 @@ return 0.10;
 
 function calculateTarget(){
 
-let target =
-parseFloat(document.getElementById("targetProfit").value) || 0;
+function calculateTarget(){
+
+let sellPrice =
+parseFloat(document.getElementById("targetSellPrice").value) || 0;
 
 let quantity =
 parseFloat(document.getElementById("quantity").value) || 0;
 
+let brokerMin =
+parseFloat(document.getElementById("brokerMin").value) || 8;
+
+let brokerRate =
+(parseFloat(document.getElementById("brokerRate").value)||0.08)/100;
+
+let clearingRate =
+(parseFloat(document.getElementById("clearingFee").value)||0.03)/100;
+
+let stampRate =
+(parseFloat(document.getElementById("stampDuty").value)||0.10)/100;
+
+
+// NET BUY
+
 let netBuyText =
 document.getElementById("netBuy")
 .innerHTML
-.replace("RM","");
+.replace("RM","")
+.replace(/,/g,'');
 
 let netBuy =
 parseFloat(netBuyText) || 0;
 
-if(quantity <= 0) return;
 
-let targetSellPrice =
-(netBuy + target) / quantity;
+// TARGET SELL
 
-document.getElementById("targetPrice")
+let grossSell =
+sellPrice * quantity;
+
+let sellBrokerage =
+Math.max(
+brokerMin,
+grossSell * brokerRate
+);
+
+let sellClearing =
+grossSell * clearingRate;
+
+let sellStamp =
+Math.ceil(
+grossSell * stampRate
+);
+
+let netSell =
+grossSell
+- sellBrokerage
+- sellClearing
+- sellStamp;
+
+
+// PROFIT
+
+let profit =
+netSell - netBuy;
+
+let profitPct =
+(profit/netBuy)*100;
+
+
+// DISPLAY
+
+document.getElementById("targetProfitRM")
 .innerHTML =
-"RM" + (Math.ceil(targetSellPrice * 100) / 100).toFixed(3);
+"RM" + formatRM(profit);
+
+document.getElementById("targetProfitPct")
+.innerHTML =
+profitPct.toFixed(2) + "%";
 
 }
 
